@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>個人化棒球球種判斷器</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:18px;background:#f2f5f8;color:#1c2636;font-family:system-ui,"Segoe UI",sans-serif}
+main{max-width:800px;margin:auto}header{background:linear-gradient(135deg,#123d34,#27795c);color:white;padding:24px;border-radius:18px;margin-bottom:16px}
+h1{margin:0 0 8px;font-size:1.8rem}header p{margin:0;color:#e2f0eb}
+.card{background:#fff;border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 4px 16px #1424380b}
+h2{font-size:1.1rem;margin:0 0 14px}label{font-weight:650;display:block;margin:8px 0}
+input[type=number]{width:100%;padding:12px;border:1px solid #d7e0e8;border-radius:10px;font-size:1rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choice{border:1px solid #d7e0e8;border-radius:10px;padding:9px 12px;background:#fff;display:flex;gap:7px;align-items:center;cursor:pointer}
+.choice:has(input:checked){background:#e6f3ed;border-color:#176b50;color:#176b50;font-weight:700}
+.choice input{accent-color:#176b50}button{width:100%;padding:14px;background:#176b50;color:white;border:0;border-radius:11px;font-size:1rem;font-weight:700;margin-top:16px;cursor:pointer}
+.note{color:#647184;font-size:.88rem;line-height:1.55}#result{display:none}.highlight{background:#e6f3ed;padding:15px;border-radius:12px;margin-bottom:14px;color:#176b50}
+.highlight strong{font-size:1.5rem;display:block}.rank{margin:14px 0}.rankline{display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px}
+.track{height:8px;background:#e8edf2;border-radius:20px;overflow:hidden}.fill{height:100%;background:#176b50;border-radius:20px}
+details summary{cursor:pointer;font-weight:700}table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:10px}td,th{text-align:left;padding:8px;border-bottom:1px solid #e0e6ed}
+footer{font-size:.8rem;color:#687487;padding:10px}
+@media(max-width:540px){body{padding:10px}.grid{grid-template-columns:1fr}.card{padding:14px}header{padding:18px}}
+</style></head><body><main>
+<header><h1>⚾ 個人化棒球球種判斷器</h1><p>以個人四縫線直球均速為基準，搭配投球球速與位移特徵判斷球種</p></header>
+<section class="card"><h2>① 球速輸入</h2><div class="grid">
+<div><label for="baseline">個人四縫線直球平均球速 (km/h)</label><input id="baseline" type="number" min="1" max="220" step="0.1" value="110"></div>
+<div><label for="speed">本次投球球速 (km/h)</label><input id="speed" type="number" min="1" max="220" step="0.1" value="100"></div></div>
+<p class="note">各球種參考速度會依原始均速比例換算到你的個人直球均速。</p></section>
+<section class="card"><h2>② 水平位移（投手朝捕手方向，投手視角）</h2><label>方向</label><div class="choices">
+<label class="choice"><input type="radio" name="hdir" value="左" checked>向左</label><label class="choice"><input type="radio" name="hdir" value="右">向右</label><label class="choice"><input type="radio" name="hdir" value="不明顯">不明顯</label></div>
+<label>大小</label><div class="choices"><label class="choice"><input type="radio" name="hsize" value="小">小</label><label class="choice"><input type="radio" name="hsize" value="中" checked>中</label><label class="choice"><input type="radio" name="hsize" value="大">大</label></div></section>
+<section class="card"><h2>③ 垂直位移</h2><label>方向</label><div class="choices"><label class="choice"><input type="radio" name="vdir" value="上">向上</label><label class="choice"><input type="radio" name="vdir" value="下" checked>向下</label><label class="choice"><input type="radio" name="vdir" value="不明顯">不明顯</label></div>
+<label>大小</label><div class="choices"><label class="choice"><input type="radio" name="vsize" value="小">小</label><label class="choice"><input type="radio" name="vsize" value="中" checked>中</label><label class="choice"><input type="radio" name="vsize" value="大">大</label></div>
+<button id="judge">判斷球種</button></section>
+<section class="card" id="result"><h2>④ 判斷結果</h2><div class="highlight">最可能的球種<strong id="winner"></strong></div><div id="rankings"></div></section>
+<section class="card"><details><summary>球種速度比例參考</summary><p class="note">依先前提供的群體平均球速換算，個人球種速度比例可能不同。</p><table><tr><th>球種</th><th>參考速度 km/h</th><th>直球比例</th></tr>
+<tr><td>四縫線</td><td>151.1</td><td>100%</td></tr><tr><td>伸卡／二縫線</td><td>150.3</td><td>99.5%</td></tr><tr><td>卡特球</td><td>146.0</td><td>96.6%</td></tr><tr><td>變速球</td><td>141.6</td><td>93.7%</td></tr><tr><td>指叉球</td><td>138.9</td><td>92.0%</td></tr><tr><td>滑球</td><td>138.1</td><td>91.4%</td></tr><tr><td>橫掃球</td><td>133.2</td><td>88.1%</td></tr><tr><td>滑曲球</td><td>129.6</td><td>85.8%</td></tr><tr><td>彈指曲球</td><td>127.1</td><td>84.1%</td></tr><tr><td>蝴蝶球</td><td>113–121</td><td>74.8–80.1%</td></tr><tr><td>曲球</td><td>115.4</td><td>76.4%</td></tr><tr><td>超慢速曲球</td><td>111.8</td><td>74.0%</td></tr></table></details></section>
+<footer>球速相似度占 60%，位移特徵占 40%。目前位移模板為初步假設，結果是候選排序，並非保證正確。</footer>
+</main>
+<script>
+const pitches=[
+{name:"四縫線速球",ref:151.1,hd:"不明顯",hs:"小",vd:"不明顯",vs:"小"},
+{name:"伸卡球／二縫線",ref:150.3,hd:"右",hs:"中",vd:"下",vs:"中"},
+{name:"卡特球",ref:146,hd:"左",hs:"小",vd:"下",vs:"小"},
+{name:"指叉球",ref:138.9,hd:"不明顯",hs:"小",vd:"下",vs:"大"},
+{name:"滑球",ref:138.1,hd:"左",hs:"中",vd:"下",vs:"中"},
+{name:"橫掃球",ref:133.2,hd:"左",hs:"大",vd:"不明顯",vs:"小"},
+{name:"曲球",ref:115.4,hd:"左",hs:"中",vd:"下",vs:"大"},
+{name:"變速球",ref:141.6,hd:"右",hs:"中",vd:"下",vs:"中"},
+{name:"滑曲球",ref:129.6,hd:"左",hs:"大",vd:"下",vs:"大"},
+{name:"彈指曲球",ref:127.1,hd:"左",hs:"中",vd:"下",vs:"大"},
+{name:"超慢速曲球",ref:111.8,hd:"左",hs:"中",vd:"下",vs:"大"},
+{name:"蝴蝶球",ref:117,hd:"不固定",hs:"不固定",vd:"不固定",vs:"不固定"}];
+const get=n=>document.querySelector(`input[name="${n}"]:checked`).value;
+function match(a,e){if(e==="不固定")return 65;if(a===e)return 100;if(a==="不明顯"||e==="不明顯")return 60;return 35;}
+document.getElementById("judge").onclick=()=>{
+const base=Number(document.getElementById("baseline").value),speed=Number(document.getElementById("speed").value);
+if(!(base>0&&speed>0)){alert("請輸入有效且大於 0 的球速");return}
+const hd=get("hdir"),hs=get("hsize"),vd=get("vdir"),vs=get("vsize");
+const ranked=pitches.map(p=>{const personal=p.ref/151.1*base;const speedScore=Math.max(0,100-Math.abs(speed-personal)*3);const movement=(match(hd,p.hd)+match(hs,p.hs)+match(vd,p.vd)+match(vs,p.vs))/4;return {...p,personal,score:Math.round(speedScore*.6+movement*.4)}}).sort((a,b)=>b.score-a.score);
+document.getElementById("winner").textContent=ranked[0].name;
+document.getElementById("rankings").innerHTML=ranked.slice(0,5).map((p,i)=>`<div class="rank"><div class="rankline"><span>${i+1}. ${p.name}</span><span>${p.score}分</span></div><div class="track"><div class="fill" style="width:${p.score}%"></div></div><p class="note">個人參考球速：${p.personal.toFixed(1)} km/h</p></div>`).join("");
+const box=document.getElementById("result");box.style.display="block";box.scrollIntoView({behavior:"smooth",block:"start"});
+};
+</script></body></html>
